@@ -8,12 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
+using System.IO;
 
 
 namespace WindowsFormsApplication2
 {
     public partial class Form1 : Form
     {
+        List<string> MOEX_tikers = new List<string>(); 
         public Form1()
         {
             InitializeComponent();
@@ -28,6 +30,18 @@ namespace WindowsFormsApplication2
             making_order.RunWorkerAsync();
         }
 
+        private void radioButton1_CheckedChanged(Object sender, EventArgs e)
+        {
+            textBox3.Visible = false;
+            label3.Visible = false;
+        }
+        private void radioButton2_CheckedChanged(Object sender, EventArgs e)
+        {
+            textBox3.Visible = true;
+            label3.Visible = true;
+        }
+
+        //метод заглушка
         private void make_order(object sender, DoWorkEventArgs e)
         {          
             bool flag = true;
@@ -124,6 +138,36 @@ namespace WindowsFormsApplication2
                     MessageBox.Show(new_order.AddOrder(amount, price, stop_los, take_pt));
                 }
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Stream myStream = null;
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    if ((myStream = openFileDialog1.OpenFile()) != null)
+                    {
+                        using (var sr = new StreamReader(myStream))
+                        {
+                            while (!sr.EndOfStream)
+                                MOEX_tikers.Add(sr.ReadLine().Trim());
+                            MessageBox.Show("Тикеры успешно загружены!");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Неудается прочитать файл: " + ex.Message);
+                }
+            }
+        }
+
+        //MICEX сравнение пар
+        private void button3_Click(object sender, EventArgs e)
+        {
+
         }
 
     }
