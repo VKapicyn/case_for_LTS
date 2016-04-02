@@ -17,6 +17,7 @@ namespace WindowsFormsApplication2
         public Form1()
         {
             InitializeComponent();
+            Control.CheckForIllegalCrossThreadCalls = false;
             Security.securities = new List<Security>();
             Security.securities.Add(new Security());
         }
@@ -36,104 +37,89 @@ namespace WindowsFormsApplication2
                     MessageBox.Show("Вы не заполнили поле \"Инструмент\" заполните\nполе и попробуте еще раз.");
                     break;
                 }
-                if (security.ticker.Equals(textBox1.Text))
-                {
-                    if (radioButton1.Checked)
-                    {
-                        try
-                        {
-
-                            MessageBox.Show(security.AddOrder(int.Parse(textBox2.Text)));
-                        }
-                        catch 
-                        {
-                            MessageBox.Show("Некорректное значение \"количество\"\nпопробуйте ввести еще раз.");
-                            break;
-                        }   
-                    }
-                    else
-                    {
-                        int amount=0;
-                        try
-                        {
-                            amount = int.Parse(textBox2.Text);
-                        }
-                        catch
-                        {
-                            MessageBox.Show("Некорректное значение \"количество\"\nпопробуйте ввести еще раз.");
-                            break;
-                        }
-                        try
-                        {
-                            MessageBox.Show(security.AddOrder(amount, double.Parse(textBox3.Text)));
-                        }
-                        catch 
-                        {
-                            MessageBox.Show("Некорректное значение \"цена\"\nпопробуйте ввести еще раз.");
-                            break;
-                        }
-                    }
-                    break;
-                }
                 else
                 {
-                    double stop_los = 0, take_pt = 0;
+                    double stop_los = 0, take_pt = 0,price=0;
 
-                    try 
+                    try
                     {
-                        stop_los = double.Parse(textBox4.Text);
+                        if (radioButton1.Checked)
+                        {
+                            if (!textBox3.Text.Equals(""))
+                                price = double.Parse(textBox3.Text);
+                            else
+                                price = 0;
+                        }
+                        else
+                        {
+                            price = double.Parse(textBox3.Text);
+                        }
                     }
-                    catch 
+                    catch
+                    {
+                        MessageBox.Show("Некорректное значение \"цена\"\nпопробуйте ввести еще раз.");
+                        break;
+                    }
+                    try
+                    {
+                        if (!textBox4.Text.Equals(""))
+                            stop_los = double.Parse(textBox4.Text);
+                        else
+                            stop_los = 0;
+                    }
+                    catch
                     {
                         MessageBox.Show("Некорректное значение \"stop-los\"\nпопробуйте ввести еще раз.");
                         break;
                     }
-                    try 
+                    try
                     {
-                        take_pt = double.Parse(textBox5.Text);
+                        if (!textBox5.Text.Equals(""))
+                            take_pt = double.Parse(textBox5.Text);
+                        else
+                            take_pt = 0;
                     }
-                    catch 
+                    catch
                     {
                         MessageBox.Show("Некорректное значение \"take-pt\"\nпопробуйте ввести еще раз.");
                         break;
                     }
-                    Security new_order = new Security(textBox1.Text,stop_los,take_pt);
-                    if (radioButton1.Checked)
+                    int amount = 0;
+                    try
                     {
-                        try
+                        amount = int.Parse(textBox2.Text);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Некорректное значение \"количество\"\nпопробуйте ввести еще раз.");
+                        break;
+                    }
+                    if (security.ticker.Equals(textBox1.Text))
+                    {
+                        if (radioButton1.Checked)
                         {
-                            MessageBox.Show(new_order.AddOrder(int.Parse(textBox2.Text)));
+                            MessageBox.Show(security.AddOrder(amount, stop_los, take_pt));
                         }
-                        catch
+                        else
                         {
-                            MessageBox.Show("Некорректное значение \"количество\"\nпопробуйте ввести еще раз.");
-                            break;
+                            MessageBox.Show(security.AddOrder(amount, double.Parse(textBox3.Text), stop_los, take_pt));
                         }
+                        break;
                     }
                     else
                     {
-                        int amount = 0;
-                        try
+                        Security new_order = new Security(textBox1.Text);
+                        if (radioButton1.Checked)
                         {
-                            amount = int.Parse(textBox2.Text);
+                            MessageBox.Show(new_order.AddOrder(amount, stop_los, take_pt));
                         }
-                        catch
+                        else
                         {
-                            MessageBox.Show("Некорректное значение \"количество\"\nпопробуйте ввести еще раз.");
-                            break;
+                            MessageBox.Show(new_order.AddOrder(amount, price, stop_los, take_pt));
                         }
-                        try
-                        {
-                            MessageBox.Show(new_order.AddOrder(amount, double.Parse(textBox3.Text)));
-                        }
-                        catch
-                        {
-                            MessageBox.Show("Некорректное значение \"цена\"\nпопробуйте ввести еще раз.");
-                            break;
-                        }
+                        break;
                     }
-                    break;
-                }
+                }   
             }
         }
 
