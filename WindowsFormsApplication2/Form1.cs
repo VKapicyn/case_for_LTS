@@ -227,7 +227,9 @@ namespace WindowsFormsApplication2
         //MICEX сравнение пар
         private void button3_Click(object sender, EventArgs e)
         {
-            User user=User.Instance;
+            Form2 form = new Form2();
+            form.ShowDialog(this);
+            User user=User.getInstance();
             user.connect();
         }
 
