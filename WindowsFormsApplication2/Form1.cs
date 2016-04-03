@@ -328,7 +328,7 @@ namespace WindowsFormsApplication2
         {
             a c = (a)b;
             StreamWriter sw = new StreamWriter(c.name, true, Encoding.UTF8);
-            sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;"+getCorrelation(c.one,c.two).ToString());
+            sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (c.one.MICEX_history.Count+1)+";B2:B"+ (c.one.MICEX_history.Count+1)+");;"+getCorrelation(c.one,c.two));
             for(int i=0; i<c.one.MICEX_history.Count-1;i++)
             {
                sw.WriteLine(c.one.MICEX_history[i].Close + ";" + c.two.MICEX_history[i].Close + ";" + (c.one.MICEX_history[i].Close / c.two.MICEX_history[i].Close).ToString());
@@ -339,7 +339,17 @@ namespace WindowsFormsApplication2
 
         private double getCorrelation(Security one, Security two)
         {
-            return 0;
+            //найти более точную формулу.
+            double x = 0, y = 0, xx = 0, xy = 0, yy = 0;
+            for (int i = 0; i < (one.MICEX_history.Count - 1); i++)
+            {
+                x += one.MICEX_history[i].Close;
+                y += two.MICEX_history[i].Close;
+                xy += one.MICEX_history[i].Close * two.MICEX_history[i].Close;
+                xx += one.MICEX_history[i].Close * one.MICEX_history[i].Close;
+                yy += two.MICEX_history[i].Close * two.MICEX_history[i].Close;
+            }
+            return (xy * one.MICEX_history.Count - x * y) / Math.Sqrt((xx * one.MICEX_history.Count - x * x) * (yy * one.MICEX_history.Count - y * y));
         }
 
         private void button5_Click(object sender, EventArgs e)
