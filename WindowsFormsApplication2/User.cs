@@ -61,7 +61,7 @@ namespace WindowsFormsApplication2
             catch
             {
                 if (slot.State.Equals(SlotState.Connected))
-                    (Application.OpenForms[0] as Form1).addEvent("ИСТОРИЯ", "Не получается загрузить историю, обратитесь в поддержку.");
+                    (Application.OpenForms[0] as Form1).addEvent("ИСТОРИЯ", "Не удалось загрузить историю, обратитесь в поддержку.");
                 else
                     (Application.OpenForms[0] as Form1).addEvent(slot.SlotID.ToString(),"Не удалось подключиться к серверу истории.");
             }
@@ -70,6 +70,12 @@ namespace WindowsFormsApplication2
         private void s_evhSlotStateChanged(object Sender, SlotEventArgs e)
         {
             (Application.OpenForms[0] as Form1).addEvent(e.Slot.ToString(), e.State.ToString());
+            if (e.State == SlotState.Failed || e.State == SlotState.Denied)
+            {
+                slot.Disconnect();
+                slot.evhSlotStateChanged -= s_evhSlotStateChanged;
+                MessageBox.Show("Не удается соединиится с сервером!\nПроверьте введенные данные.");
+            }
         }
     }
 }

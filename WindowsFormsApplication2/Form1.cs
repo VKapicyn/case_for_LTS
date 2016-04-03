@@ -15,7 +15,7 @@ namespace WindowsFormsApplication2
 {
     public partial class Form1 : Form
     {
-        List<string> MOEX_tikers = new List<string>(); 
+        List<string> MOEX_tikers = new List<string>();
         public Form1()
         {
             InitializeComponent();
@@ -166,6 +166,7 @@ namespace WindowsFormsApplication2
             }
         }
 
+        
         private void button2_Click(object sender, EventArgs e)
         {
             Stream myStream = null;
@@ -179,7 +180,12 @@ namespace WindowsFormsApplication2
                         {
                             while (!sr.EndOfStream)
                                 MOEX_tikers.Add(sr.ReadLine().Trim());
+                            List<string> MOEX2_tikers = new List<string>(MOEX_tikers);
+                            comboBox1.DataSource = MOEX_tikers;
+                            comboBox2.DataSource = MOEX2_tikers;
                             MessageBox.Show("Тикеры успешно загружены!");
+                            label13.Text="Загружено тикеров: " + MOEX_tikers.Count;
+                            label14.Text = "Число сочетаний: " + ((Math.Pow(MOEX_tikers.Count, 2) - MOEX_tikers.Count) / 2).ToString();
                         }
                     }
                 }
@@ -229,9 +235,42 @@ namespace WindowsFormsApplication2
         {
             Form2 form = new Form2();
             form.ShowDialog(this);
-            User user=User.getInstance();
+            User user = User.getInstance();
             user.connect();
+            Security first = new Security(comboBox1.SelectedItem.ToString());
+            Security second = new Security(comboBox2.SelectedItem.ToString());
+            int time = 0, from = 0;
+            try
+            {
+                time = int.Parse(textBox6.Text);
+                if (time <= 0)
+                    throw new Exception();
+            }
+            catch
+            {
+                MessageBox.Show("Некорректное значения таймфрейма.");
+                return;
+            }
+            try
+            {
+                from = int.Parse(textBox7.Text);
+                if (from < 1 || from > 30)
+                    throw new Exception();
+            }
+            catch
+            {
+                MessageBox.Show("Некорректное значения периода.");
+                return;
+            }
+            first.MICEX_history = user.getHistory("TQBR", first.ticker, DateTime.Now.AddDays((-1)*from), DateTime.Now, time);
+            second.MICEX_history = user.getHistory("TQBR", second.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
+            //подсчет общей корреляции и сохранение в файл
+            //вывод графика
         }
 
+        private void button5_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Заглушка");
+        }
     }
 }

@@ -5,14 +5,28 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
+using Atentis.History;
 
 namespace WindowsFormsApplication2
 {
     class Security
     {
         public static List<Security> securities;
+        private List<RawCandle> _MICEX_history;
+        public List<RawCandle> MICEX_history
+        {
+            get
+            { 
+                return _MICEX_history; 
+            }
+            set
+            {
+                _MICEX_history = MICEX_history;
+            }
+        }
         public Security()
         {
+            _MICEX_history = new List<RawCandle>();
             _history = new List<History>();
             _transactions = new List<int>();
             this.amount = 0;
@@ -22,6 +36,7 @@ namespace WindowsFormsApplication2
 
         public Security(string ticker)
         {
+            _MICEX_history = new List<RawCandle>();
             _history = new List<History>();
             _transactions = new List<int>();
             this.ticker = ticker;

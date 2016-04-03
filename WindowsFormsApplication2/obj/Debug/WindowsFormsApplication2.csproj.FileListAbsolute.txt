@@ -11,3 +11,4 @@ C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\bin
 C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\bin\Debug\Atentis.History.dll
 C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\bin\Debug\Atentis.History.xml
 C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\WindowsFormsApplication2.Form2.resources
+C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\WindowsFormsApplication2.exe.licenses
