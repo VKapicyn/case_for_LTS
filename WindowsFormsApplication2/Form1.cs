@@ -328,7 +328,7 @@ namespace WindowsFormsApplication2
         {
             a c = (a)b;
             StreamWriter sw = new StreamWriter(c.name, true, Encoding.UTF8);
-            sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (c.one.MICEX_history.Count+1)+";B2:B"+ (c.one.MICEX_history.Count+1)+");;"+getCorrelation(c.one,c.two));
+            sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (c.one.MICEX_history.Count+1)+"'B2:B"+ (c.one.MICEX_history.Count+1)+");;"+getCorrelation(c.one,c.two));
             for(int i=0; i<c.one.MICEX_history.Count-1;i++)
             {
                sw.WriteLine(c.one.MICEX_history[i].Close + ";" + c.two.MICEX_history[i].Close + ";" + (c.one.MICEX_history[i].Close / c.two.MICEX_history[i].Close).ToString());
