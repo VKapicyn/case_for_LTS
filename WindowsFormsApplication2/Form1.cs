@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using System.IO;
+using Atentis.History;
 
 
 namespace WindowsFormsApplication2
@@ -233,12 +234,25 @@ namespace WindowsFormsApplication2
         //MICEX сравнение пар
         private void button3_Click(object sender, EventArgs e)
         {
-            Form2 form = new Form2();
-            form.ShowDialog(this);
-            User user = User.getInstance();
-            user.connect();
-            Security first = new Security(comboBox1.SelectedItem.ToString());
-            Security second = new Security(comboBox2.SelectedItem.ToString());
+            Security first, second;
+            if (comboBox1.SelectedItem.ToString() == "" || comboBox1.SelectedItem == null)
+            {
+                MessageBox.Show("Не выбран первый тикер.");
+                return;
+            }
+            else
+            {
+                first = new Security(comboBox1.SelectedItem.ToString());
+            }
+            if (comboBox2.SelectedItem.ToString() == "" || comboBox2.SelectedItem == null)
+            {
+                MessageBox.Show("Не выбран второй тикер.");
+                return;
+            }
+            else
+            {
+                second = new Security(comboBox2.SelectedItem.ToString());
+            }
             int time = 0, from = 0;
             try
             {
@@ -262,10 +276,70 @@ namespace WindowsFormsApplication2
                 MessageBox.Show("Некорректное значения периода.");
                 return;
             }
-            first.MICEX_history = user.getHistory("TQBR", first.ticker, DateTime.Now.AddDays((-1)*from), DateTime.Now, time);
+
+            Form2 form = new Form2();
+            form.ShowDialog(this);
+            User user = User.getInstance();
+            user.connect();
+            first.MICEX_history = user.getHistory("TQBR", first.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
             second.MICEX_history = user.getHistory("TQBR", second.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
-            //подсчет общей корреляции и сохранение в файл
+            if (first.MICEX_history == null)
+            {
+                MessageBox.Show("Неудалось получить историю инструмента " + first.ticker);
+                return;
+            }
+            if (second.MICEX_history == null)
+            {
+                MessageBox.Show("Неудалось получить историю инструмента " + second.ticker);
+                return;
+            }
+            user.disconnect();
+            a parametr = new a();
+            Stream myStream;//неиспользуемый поток, при убитии которого можно записать в файл из неосновного потока. 
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+            saveFileDialog1.Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*";
+            saveFileDialog1.FilterIndex = 2;
+            saveFileDialog1.RestoreDirectory = true;
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                if ((myStream = saveFileDialog1.OpenFile()) != null)
+                {
+                    myStream.Close();
+                    parametr.one = first;
+                    parametr.two = second;
+                     parametr.name = saveFileDialog1.FileName;
+                  }
+            }
+
+            Thread thread = new Thread(new ParameterizedThreadStart(output));
+            thread.Start(parametr);
+            
             //вывод графика
+        }
+        struct a
+        {
+            public Security one, two;
+            public string name;
+        }
+
+        private void output(object b)
+        {
+            a c = (a)b;
+            StreamWriter sw = new StreamWriter(c.name, true, Encoding.UTF8);
+            sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;"+getCorrelation(c.one,c.two).ToString());
+            for(int i=0; i<c.one.MICEX_history.Count-1;i++)
+            {
+               sw.WriteLine(c.one.MICEX_history[i].Close + ";" + c.two.MICEX_history[i].Close + ";" + (c.one.MICEX_history[i].Close / c.two.MICEX_history[i].Close).ToString());
+            }
+            sw.Close();
+            MessageBox.Show("Файл сохранен");     
+        }
+
+        private double getCorrelation(Security one, Security two)
+        {
+            return 0;
         }
 
         private void button5_Click(object sender, EventArgs e)

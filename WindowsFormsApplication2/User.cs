@@ -13,7 +13,9 @@ namespace WindowsFormsApplication2
     public class User
     {
         private Slot slot;
-        private List<RawCandle> res = new List<RawCandle>();
+        public List<RawCandle> res
+        { get; set; }
+
         private HistoryProvider provider = new HistoryProvider();
 
         private static User instance;
@@ -35,6 +37,7 @@ namespace WindowsFormsApplication2
 
         private User()
         {
+            res = new List<RawCandle>();
             slot = new Slot();         
         }
 
@@ -50,6 +53,13 @@ namespace WindowsFormsApplication2
             slot.rqs.Init();
             slot.Start();
         }
+
+        public void disconnect()
+        {
+            this.slot.Disconnect();
+            slot.evhSlotStateChanged -= s_evhSlotStateChanged;
+            (Application.OpenForms[0] as Form1).addEvent(slot.ServerID,"Запланировано отключен от сервера");
+        }
         public List<RawCandle> getHistory(string SECBOARD, string SECCODE, DateTime from, DateTime till, int timeFrame)
         {
             try
@@ -57,6 +67,7 @@ namespace WindowsFormsApplication2
                 HistoryRequest req = new HistoryRequest(SECBOARD, SECCODE, timeFrame,from,till);
                 res = provider.LoadHistory(req, true);
                 (Application.OpenForms[0] as Form1).addEvent("ИСТОРИЯ", "История загружена.");
+                
             }
             catch
             {
@@ -74,7 +85,7 @@ namespace WindowsFormsApplication2
             {
                 slot.Disconnect();
                 slot.evhSlotStateChanged -= s_evhSlotStateChanged;
-                MessageBox.Show("Не удается соединиится с сервером!\nПроверьте введенные данные.");
+                MessageBox.Show("Не удается соединиится с сервером!\nПроверьте введенные данные.\n "+slot.Login+" "+slot.Server+" "+slot.Port);
             }
         }
     }
