@@ -85,7 +85,7 @@ namespace WindowsFormsApplication2
                 this.amount -= amount;
                 buysell = "S";
             }
-            (Application.OpenForms[0] as Form1).dataGridView1.Rows.Add(order, this.ticker, amount, this.price,buysell, "Limit", stop_los, take_pt);
+            (Application.OpenForms[0] as Form1).dataGridView1.Rows.Add(order, this.ticker, amount, this.price,buysell, "Market", stop_los, take_pt);
             order++;
             this.transactions.Add(order);
             return String.Format("Инструмент: {0,-5}\nКоличество: {2,-5}\nНаправление: {3,-5}\nТип заявки: {4,-5}\nstop-los: {5,-5}\ntake-pt: {6,-5}",

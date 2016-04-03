@@ -28,11 +28,11 @@ namespace WindowsFormsApplication2
         private void initEvents()
         {
             listView1.Clear();
-            listView1.Columns.Add("N", 30, HorizontalAlignment.Right);
+            listView1.Columns.Add("N", 20, HorizontalAlignment.Right);
             listView1.Columns.Add("Date", 70, HorizontalAlignment.Left);
-            listView1.Columns.Add("Time", 80, HorizontalAlignment.Left);
-            listView1.Columns.Add("Source", 100, HorizontalAlignment.Left);
-            listView1.Columns.Add("Event", 400, HorizontalAlignment.Left);
+            listView1.Columns.Add("Time", 70, HorizontalAlignment.Left);
+            listView1.Columns.Add("Source", 70, HorizontalAlignment.Left);
+            listView1.Columns.Add("Event", 200, HorizontalAlignment.Left);
         }
         private void Form1_Closing(object sender, FormClosingEventArgs e)
         {
@@ -133,6 +133,7 @@ namespace WindowsFormsApplication2
                 if (textBox1.Text == "")
                 {
                     MessageBox.Show("Вы не заполнили поле \"Инструмент\" заполните\nполе и попробуте еще раз.");
+                    flag = false;
                     break;
                 }
                 else
@@ -235,7 +236,9 @@ namespace WindowsFormsApplication2
         private void button3_Click(object sender, EventArgs e)
         {
             Security first, second;
-            if (comboBox1.SelectedItem.ToString() == "" || comboBox1.SelectedItem == null)
+            if (comboBox1.SelectedItem == null || comboBox2.SelectedItem==null)
+                return;
+            if (comboBox1.SelectedItem.ToString() == "")
             {
                 MessageBox.Show("Не выбран первый тикер.");
                 return;
@@ -244,7 +247,7 @@ namespace WindowsFormsApplication2
             {
                 first = new Security(comboBox1.SelectedItem.ToString());
             }
-            if (comboBox2.SelectedItem.ToString() == "" || comboBox2.SelectedItem == null)
+            if (comboBox2.SelectedItem.ToString() == "")
             {
                 MessageBox.Show("Не выбран второй тикер.");
                 return;
@@ -298,7 +301,7 @@ namespace WindowsFormsApplication2
             Stream myStream;//неиспользуемый поток, при убитии которого можно записать в файл из неосновного потока. 
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
 
-            saveFileDialog1.Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*";
+            saveFileDialog1.Filter = "csv files (*.csv)|*.csv";
             saveFileDialog1.FilterIndex = 2;
             saveFileDialog1.RestoreDirectory = true;
 
@@ -309,12 +312,15 @@ namespace WindowsFormsApplication2
                     myStream.Close();
                     parametr.one = first;
                     parametr.two = second;
-                     parametr.name = saveFileDialog1.FileName;
-                  }
+                    parametr.name = saveFileDialog1.FileName;
+                }
             }
 
-            Thread thread = new Thread(new ParameterizedThreadStart(output));
-            thread.Start(parametr);
+            if (saveFileDialog1.FileName != "")
+            {
+                Thread thread = new Thread(new ParameterizedThreadStart(output));
+                thread.Start(parametr);
+            }
             
             //вывод графика
         }
@@ -327,14 +333,16 @@ namespace WindowsFormsApplication2
         private void output(object b)
         {
             a c = (a)b;
-            StreamWriter sw = new StreamWriter(c.name, true, Encoding.UTF8);
-            sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (c.one.MICEX_history.Count+1)+"'B2:B"+ (c.one.MICEX_history.Count+1)+");;"+getCorrelation(c.one,c.two));
-            for(int i=0; i<c.one.MICEX_history.Count-1;i++)
-            {
-               sw.WriteLine(c.one.MICEX_history[i].Close + ";" + c.two.MICEX_history[i].Close + ";" + (c.one.MICEX_history[i].Close / c.two.MICEX_history[i].Close).ToString());
-            }
-            sw.Close();
-            MessageBox.Show("Файл сохранен");     
+                StreamWriter sw = new StreamWriter(c.name, true, Encoding.UTF8);
+                sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (c.one.MICEX_history.Count + 1) + "'B2:B" + (c.one.MICEX_history.Count + 1) + ");;" + getCorrelation(c.one, c.two));
+                for (int i = 1; i < c.one.MICEX_history.Count - 1; i++)
+                {
+                    sw.WriteLine(c.one.MICEX_history[i].Close + ";" + c.two.MICEX_history[i].Close + ";" + (1+(((c.one.MICEX_history[i].Close - c.one.MICEX_history[i - 1].Close) / c.one.MICEX_history[i - 1].Close) - (c.two.MICEX_history[i].Close - c.two.MICEX_history[i - 1].Close) / c.two.MICEX_history[i - 1].Close)).ToString());
+                }
+                sw.Close();
+                MessageBox.Show("Файл сохранен");
+                User user = User.getInstance();
+                user.clear();
         }
 
         private double getCorrelation(Security one, Security two)

@@ -204,6 +204,7 @@
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(100, 21);
             this.textBox3.TabIndex = 8;
+            this.textBox3.Visible = false;
             // 
             // textBox2
             // 
@@ -230,6 +231,7 @@
             this.label3.Size = new System.Drawing.Size(33, 13);
             this.label3.TabIndex = 5;
             this.label3.Text = "Цена";
+            this.label3.Visible = false;
             // 
             // label2
             // 
@@ -267,12 +269,10 @@
             // 
             this.radioButton2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.radioButton2.AutoSize = true;
-            this.radioButton2.Checked = true;
             this.radioButton2.Location = new System.Drawing.Point(7, 40);
             this.radioButton2.Name = "radioButton2";
             this.radioButton2.Size = new System.Drawing.Size(74, 17);
             this.radioButton2.TabIndex = 1;
-            this.radioButton2.TabStop = true;
             this.radioButton2.Text = "Лимитная";
             this.radioButton2.UseVisualStyleBackColor = true;
             this.radioButton2.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
@@ -281,10 +281,12 @@
             // 
             this.radioButton1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.radioButton1.AutoSize = true;
+            this.radioButton1.Checked = true;
             this.radioButton1.Location = new System.Drawing.Point(7, 19);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(75, 17);
             this.radioButton1.TabIndex = 0;
+            this.radioButton1.TabStop = true;
             this.radioButton1.Text = "Рыночная";
             this.radioButton1.UseVisualStyleBackColor = true;
             this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
@@ -607,6 +609,7 @@
             this.MinimumSize = new System.Drawing.Size(406, 464);
             this.Name = "Form1";
             this.Text = "Security";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_Closing);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();

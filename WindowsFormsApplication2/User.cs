@@ -43,15 +43,19 @@ namespace WindowsFormsApplication2
 
         public void connect()
         {
-            slot.SlotID = this.login;
-            slot.Login = this.login;
-            slot.Password = this.password;
-            slot.Server = this.server;
-            slot.Port = this.port; 
-            slot.evhSlotStateChanged += s_evhSlotStateChanged;
-            slot.rqs = new RequestSocket(slot);
-            slot.rqs.Init();
-            slot.Start();
+            try
+            {
+                slot.SlotID = this.login;
+                slot.Login = this.login;
+                slot.Password = this.password;
+                slot.Server = this.server;
+                slot.Port = this.port;
+                slot.evhSlotStateChanged += s_evhSlotStateChanged;
+                slot.rqs = new RequestSocket(slot);
+                slot.rqs.Init();
+                slot.Start();
+            }
+            catch {  }
         }
 
         public void disconnect()
@@ -59,6 +63,11 @@ namespace WindowsFormsApplication2
             this.slot.Disconnect();
             slot.evhSlotStateChanged -= s_evhSlotStateChanged;
             (Application.OpenForms[0] as Form1).addEvent(slot.ServerID,"Запланировано отключен от сервера");
+        }
+
+        public void clear()
+        {
+            res = new List<RawCandle>();
         }
         public List<RawCandle> getHistory(string SECBOARD, string SECCODE, DateTime from, DateTime till, int timeFrame)
         {
