@@ -7,3 +7,6 @@ C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\obj
 C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\WindowsFormsApplication2.csproj.GenerateResource.Cache
 C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\WindowsFormsApplication2.exe
 C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\obj\Debug\WindowsFormsApplication2.pdb
+C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\bin\Debug\Atentis.Connection.dll
+C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\bin\Debug\Atentis.History.dll
+C:\Users\Vladislav\Desktop\WindowsFormsApplication2\WindowsFormsApplication2\bin\Debug\Atentis.History.xml
