@@ -399,7 +399,7 @@ namespace WindowsFormsApplication2
                 StreamWriter sw = new StreamWriter(c.name, true, Encoding.UTF8);
                 sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (c.one.history.Count + 1) + "'B2:B" + (c.one.history.Count + 1) + ");;" + getCorrelation(c.one, c.two));
                 sw.WriteLine(c.one.history[0].Close + ";" + c.two.history[0].Close + ";1");
-                for (int i = 1; i < c.one.history.Count; i++)
+                for (int i = 1; i < c.one.history.Count&&i<c.two.history.Count; i++)
                 {
                     sw.WriteLine(c.one.history[i].Close + ";" + c.two.history[i].Close + ";" + (1+(((c.one.history[i].Close - c.one.history[i - 1].Close) / c.one.history[i - 1].Close) - (c.two.history[i].Close - c.two.history[i - 1].Close) / c.two.history[i - 1].Close)).ToString());
                 }
@@ -412,14 +412,14 @@ namespace WindowsFormsApplication2
         {
             //найти более точную формулу.
             double x = 0, y = 0, xx = 0, xy = 0, yy = 0;
-            for (int i = 0; i < (one.history.Count); i++)
-            {
-                x += one.history[i].Close;
-                y += two.history[i].Close;
-                xy += one.history[i].Close * two.history[i].Close;
-                xx += one.history[i].Close * one.history[i].Close;
-                yy += two.history[i].Close * two.history[i].Close;
-            }
+            for (int i = 0; i < one.history.Count && i < two.history.Count; i++)
+                {
+                    x += one.history[i].Close;
+                    y += two.history[i].Close;
+                    xy += one.history[i].Close * two.history[i].Close;
+                    xx += one.history[i].Close * one.history[i].Close;
+                    yy += two.history[i].Close * two.history[i].Close;
+                }
             return (xy * one.history.Count - x * y) / Math.Sqrt((xx * one.history.Count - x * x) * (yy * one.history.Count - y * y));
         }
 
@@ -520,7 +520,7 @@ namespace WindowsFormsApplication2
             StreamWriter sw = new StreamWriter(name, true, Encoding.UTF8);
             sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (first.history.Count + 1) + "'B2:B" + (first.history.Count + 1) + ");;" + getCorrelation(first, second));
             sw.WriteLine(first.history[0].Close + ";" + first.history[0].Close + ";1");
-            for (int i = 1; i < first.history.Count; i++)
+            for (int i = 1; i < first.history.Count && i < second.history.Count; i++)
             {
                 sw.WriteLine(first.history[i].Close + ";" + second.history[i].Close + ";" + (1 + (((first.history[i].Close - first.history[i - 1].Close) / first.history[i - 1].Close) - (second.history[i].Close - second.history[i - 1].Close) / second.history[i - 1].Close)).ToString());
             }
