@@ -274,7 +274,7 @@ namespace WindowsFormsApplication2
                 item.EnsureVisible();
         }
 
-        //MICEX сравнение пар
+        //сравнение пар
         private void button3_Click(object sender, EventArgs e)
         {
             Security first, second;
@@ -422,6 +422,8 @@ namespace WindowsFormsApplication2
             }
             return (xy * one.history.Count - x * y) / Math.Sqrt((xx * one.history.Count - x * x) * (yy * one.history.Count - y * y));
         }
+
+        //сравнение всех пар
         private void button5_Click(object sender, EventArgs e)
         {
             BackgroundWorker making_correl = new BackgroundWorker();

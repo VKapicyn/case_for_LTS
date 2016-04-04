@@ -59,9 +59,7 @@ namespace WindowsFormsApplication2
                     webClient.DownloadFile("http://real-chart.finance.yahoo.com/table.csv?s=" + ticker + "&a=00&b=1&c=" + (DateTime.Now.Year - from) + "&d=" + month + "&e=" + DateTime.Now.Day + "&f=" + DateTime.Now.Year + "&m=d&ignore=.csv", "base" + @"\" + ticker + ".csv");
             }
             catch
-            {
-                (Application.OpenForms[0] as Form1).addEvent(ticker, "Ошибка тут.");
-                return null; }
+            { return null; }
             (Application.OpenForms[0] as Form1).addEvent(ticker, "История загружена.");
 
             List<RawCandle> res = new List<RawCandle>();
