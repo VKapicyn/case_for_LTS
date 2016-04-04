@@ -47,33 +47,62 @@ namespace WindowsFormsApplication2
 
         public List<RawCandle> getHistory(string ticker, int from, int time)
         {
+            List<RawCandle> res = new List<RawCandle>();
+            bool flag = false;
             try
             {
                 WebClient webClient = new WebClient();
                 string month=(DateTime.Now.Month)>10?(DateTime.Now.Month-1).ToString():"0"+(DateTime.Now.Month-1).ToString();
-                if(time==1)
-                    webClient.DownloadFile("http://real-chart.finance.yahoo.com/table.csv?s=" + ticker + "&a=00&b=1&c=" + (DateTime.Now.Year - from) + "&d=" + month + "&e=" + DateTime.Now.Day + "&f=" + DateTime.Now.Year + "&g=d&ignore=.csv", "base" + @"\" + ticker + ".csv");
+                if (time == 1)
+                    try
+                    {
+                        res = open(ticker); 
+                    }
+                    catch 
+                    {
+                        flag = true;
+                        webClient.DownloadFile("http://real-chart.finance.yahoo.com/table.csv?s=" + ticker + "&a=00&b=1&c=" + (DateTime.Now.Year - from) + "&d=" + month + "&e=" + DateTime.Now.Day + "&f=" + DateTime.Now.Year + "&g=d&ignore=.csv", "base" + @"\" + ticker + ".csv");
+                    }
                 if (time == 7)
-                    webClient.DownloadFile("http://real-chart.finance.yahoo.com/table.csv?s=" + ticker + "&a=00&b=1&c=" + (DateTime.Now.Year - from) + "&d=" + month + "&e=" + DateTime.Now.Day + "&f=" + DateTime.Now.Year + "&w=d&ignore=.csv", "base" + @"\" + ticker + ".csv");
+                    try
+                    {
+                        res = open(ticker);
+                    }
+                    catch
+                    {
+                        flag = true;
+                        webClient.DownloadFile("http://real-chart.finance.yahoo.com/table.csv?s=" + ticker + "&a=00&b=1&c=" + (DateTime.Now.Year - from) + "&d=" + month + "&e=" + DateTime.Now.Day + "&f=" + DateTime.Now.Year + "&w=d&ignore=.csv", "base" + @"\" + ticker + ".csv");
+                    }
                 if (time == 30)
-                    webClient.DownloadFile("http://real-chart.finance.yahoo.com/table.csv?s=" + ticker + "&a=00&b=1&c=" + (DateTime.Now.Year - from) + "&d=" + month + "&e=" + DateTime.Now.Day + "&f=" + DateTime.Now.Year + "&m=d&ignore=.csv", "base" + @"\" + ticker + ".csv");
+                    try
+                    {
+                        res = open(ticker);
+                    }
+                    catch
+                    {
+                        flag = true;
+                        webClient.DownloadFile("http://real-chart.finance.yahoo.com/table.csv?s=" + ticker + "&a=00&b=1&c=" + (DateTime.Now.Year - from) + "&d=" + month + "&e=" + DateTime.Now.Day + "&f=" + DateTime.Now.Year + "&m=d&ignore=.csv", "base" + @"\" + ticker + ".csv");
+                    }
             }
             catch
             { return null; }
             (Application.OpenForms[0] as Form1).addEvent(ticker, "История загружена.");
 
+            if (flag)
+                res=open(ticker);
+
+            return res;
+        }
+
+        private List<RawCandle> open(string ticker)
+        {
             List<RawCandle> res = new List<RawCandle>();
             NumberFormatInfo nfi_e = new CultureInfo("en-US", false).NumberFormat;
-            try
-            {
+
                 using (var sr = new StreamReader("base" + @"\" + ticker + ".csv"))
                 {
-                    try
-                    {
-                        var first = sr.ReadLine().Split(',');//пропускаем первую строку c заголовком
-                    }
-                    catch { return null; }
 
+                    var first = sr.ReadLine().Split(',');//пропускаем первую строку c заголовком
                     while (!sr.EndOfStream)
                     {
                         var line = sr.ReadLine().Split(',');
@@ -84,8 +113,7 @@ namespace WindowsFormsApplication2
                     }
                 }
                 (Application.OpenForms[0] as Form1).addEvent(ticker, "История сформирована.");
-            }
-            catch { return null; }
+
             return res;
         }
     }
