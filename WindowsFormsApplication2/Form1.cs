@@ -32,7 +32,7 @@ namespace WindowsFormsApplication2
             listView1.Columns.Add("Date", 70, HorizontalAlignment.Left);
             listView1.Columns.Add("Time", 70, HorizontalAlignment.Left);
             listView1.Columns.Add("Source", 70, HorizontalAlignment.Left);
-            listView1.Columns.Add("Event", 200, HorizontalAlignment.Left);
+            listView1.Columns.Add("Event", 140, HorizontalAlignment.Left);
         }
         private void Form1_Closing(object sender, FormClosingEventArgs e)
         {
@@ -87,6 +87,8 @@ namespace WindowsFormsApplication2
                 else
                 {
                     price = double.Parse(textBox3.Text);
+                    if (price <= 0)
+                        throw new Exception();
                 }
             }
             catch
@@ -97,9 +99,15 @@ namespace WindowsFormsApplication2
             try
             {
                 if (!textBox4.Text.Equals(""))
+                {
                     stop_los = double.Parse(textBox4.Text);
+                    if (stop_los <= 0)
+                        throw new Exception();
+                }
                 else
                     stop_los = 0;
+
+                
             }
             catch
             {
@@ -109,7 +117,11 @@ namespace WindowsFormsApplication2
             try
             {
                 if (!textBox5.Text.Equals(""))
+                {
                     take_pt = double.Parse(textBox5.Text);
+                    if (take_pt <= 0)
+                        throw new Exception();
+                }
                 else
                     take_pt = 0;
             }
@@ -121,6 +133,8 @@ namespace WindowsFormsApplication2
             try
             {
                 amount = int.Parse(textBox2.Text);
+                if (amount <= 0)
+                    throw new Exception();
             }
             catch
             {
@@ -143,11 +157,19 @@ namespace WindowsFormsApplication2
                         flag = false;
                         if (radioButton1.Checked)
                         {
-                            MessageBox.Show(security.AddOrder(amount, stop_los, take_pt));
+                            var result = MessageBox.Show(security.check(amount, stop_los, take_pt), "Подтверждение",
+                                 MessageBoxButtons.YesNo,
+                                 MessageBoxIcon.Question);
+                            if (result == DialogResult.Yes)
+                                security.addOrder(amount, stop_los, take_pt);
                         }
                         else
                         {
-                            MessageBox.Show(security.AddOrder(amount, price, stop_los, take_pt));
+                            var result = MessageBox.Show(security.check(amount, price, stop_los, take_pt), "Подтверждение",
+                                 MessageBoxButtons.YesNo,
+                                 MessageBoxIcon.Question);
+                            if (result == DialogResult.Yes)
+                                security.addOrder(amount, price, stop_los, take_pt);
                         }
                         break;
                     }
@@ -159,11 +181,19 @@ namespace WindowsFormsApplication2
                 Security new_order = new Security(textBox1.Text);
                 if (radioButton1.Checked)
                 {
-                    MessageBox.Show(new_order.AddOrder(amount, stop_los, take_pt));
+                    var result = MessageBox.Show(new_order.check(amount, stop_los, take_pt), "Подтверждение",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    new_order.addOrder(amount, stop_los, take_pt);
                 }
                 else
                 {
-                    MessageBox.Show(new_order.AddOrder(amount, price, stop_los, take_pt));
+                    var result = MessageBox.Show(new_order.check(amount, price, stop_los, take_pt), "Подтверждение",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                        new_order.addOrder(amount, price, stop_los, take_pt);    
                 }
             }
         }
@@ -280,23 +310,20 @@ namespace WindowsFormsApplication2
                 return;
             }
 
-            Form2 form = new Form2();
-            form.ShowDialog(this);
             User user = User.getInstance();
-            user.connect();
-            first.MICEX_history = user.getHistory("TQBR", first.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
-            second.MICEX_history = user.getHistory("TQBR", second.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
-            if (first.MICEX_history == null)
+            first.history = user.getHistory("TQBR", first.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
+            second.history = user.getHistory("TQBR", second.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
+            if (first.history == null)
             {
                 MessageBox.Show("Неудалось получить историю инструмента " + first.ticker);
                 return;
             }
-            if (second.MICEX_history == null)
+            if (second.history == null)
             {
                 MessageBox.Show("Неудалось получить историю инструмента " + second.ticker);
                 return;
             }
-            user.disconnect();
+
             a parametr = new a();
             Stream myStream;//неиспользуемый поток, при убитии которого можно записать в файл из неосновного потока. 
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
@@ -321,8 +348,6 @@ namespace WindowsFormsApplication2
                 Thread thread = new Thread(new ParameterizedThreadStart(output));
                 thread.Start(parametr);
             }
-            
-            //вывод графика
         }
         struct a
         {
@@ -334,13 +359,13 @@ namespace WindowsFormsApplication2
         {
             a c = (a)b;
                 StreamWriter sw = new StreamWriter(c.name, true, Encoding.UTF8);
-                sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (c.one.MICEX_history.Count + 1) + "'B2:B" + (c.one.MICEX_history.Count + 1) + ");;" + getCorrelation(c.one, c.two));
-                for (int i = 1; i < c.one.MICEX_history.Count - 1; i++)
+                sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (c.one.history.Count + 1) + "'B2:B" + (c.one.history.Count + 1) + ");;" + getCorrelation(c.one, c.two));
+                for (int i = 1; i < c.one.history.Count - 1; i++)
                 {
-                    sw.WriteLine(c.one.MICEX_history[i].Close + ";" + c.two.MICEX_history[i].Close + ";" + (1+(((c.one.MICEX_history[i].Close - c.one.MICEX_history[i - 1].Close) / c.one.MICEX_history[i - 1].Close) - (c.two.MICEX_history[i].Close - c.two.MICEX_history[i - 1].Close) / c.two.MICEX_history[i - 1].Close)).ToString());
+                    sw.WriteLine(c.one.history[i].Close + ";" + c.two.history[i].Close + ";" + (1+(((c.one.history[i].Close - c.one.history[i - 1].Close) / c.one.history[i - 1].Close) - (c.two.history[i].Close - c.two.history[i - 1].Close) / c.two.history[i - 1].Close)).ToString());
                 }
                 sw.Close();
-                MessageBox.Show("Файл сохранен");
+                addEvent("System","Файл "+c.name+" сохранен");
                 User user = User.getInstance();
                 user.clear();
         }
@@ -349,15 +374,15 @@ namespace WindowsFormsApplication2
         {
             //найти более точную формулу.
             double x = 0, y = 0, xx = 0, xy = 0, yy = 0;
-            for (int i = 0; i < (one.MICEX_history.Count - 1); i++)
+            for (int i = 0; i < (one.history.Count - 1); i++)
             {
-                x += one.MICEX_history[i].Close;
-                y += two.MICEX_history[i].Close;
-                xy += one.MICEX_history[i].Close * two.MICEX_history[i].Close;
-                xx += one.MICEX_history[i].Close * one.MICEX_history[i].Close;
-                yy += two.MICEX_history[i].Close * two.MICEX_history[i].Close;
+                x += one.history[i].Close;
+                y += two.history[i].Close;
+                xy += one.history[i].Close * two.history[i].Close;
+                xx += one.history[i].Close * one.history[i].Close;
+                yy += two.history[i].Close * two.history[i].Close;
             }
-            return (xy * one.MICEX_history.Count - x * y) / Math.Sqrt((xx * one.MICEX_history.Count - x * x) * (yy * one.MICEX_history.Count - y * y));
+            return (xy * one.history.Count - x * y) / Math.Sqrt((xx * one.history.Count - x * x) * (yy * one.history.Count - y * y));
         }
 
         private void button5_Click(object sender, EventArgs e)

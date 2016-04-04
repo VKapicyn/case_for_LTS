@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Atentis.Connection;
 using Atentis.History;
 using System.Windows.Forms;
 using System.Threading;
@@ -12,9 +11,8 @@ namespace WindowsFormsApplication2
 {
     public class User
     {
-        private Slot slot;
         public List<RawCandle> res
-        { get; set; }
+        { get; private set; }
 
         private HistoryProvider provider = new HistoryProvider();
 
@@ -26,43 +24,9 @@ namespace WindowsFormsApplication2
             return instance;
         }
 
-        public string login
-        { get; set; }
-        public string password
-        { get; set; }
-        public string server
-        { get; set; }
-        public int port
-        { get; set; }
-
         private User()
         {
-            res = new List<RawCandle>();
-            slot = new Slot();         
-        }
-
-        public void connect()
-        {
-            try
-            {
-                slot.SlotID = this.login;
-                slot.Login = this.login;
-                slot.Password = this.password;
-                slot.Server = this.server;
-                slot.Port = this.port;
-                slot.evhSlotStateChanged += s_evhSlotStateChanged;
-                slot.rqs = new RequestSocket(slot);
-                slot.rqs.Init();
-                slot.Start();
-            }
-            catch {  }
-        }
-
-        public void disconnect()
-        {
-            this.slot.Disconnect();
-            slot.evhSlotStateChanged -= s_evhSlotStateChanged;
-            (Application.OpenForms[0] as Form1).addEvent(slot.ServerID,"Запланировано отключен от сервера");
+            res = new List<RawCandle>();       
         }
 
         public void clear()
@@ -75,27 +39,14 @@ namespace WindowsFormsApplication2
             {
                 HistoryRequest req = new HistoryRequest(SECBOARD, SECCODE, timeFrame,from,till);
                 res = provider.LoadHistory(req, true);
-                (Application.OpenForms[0] as Form1).addEvent("ИСТОРИЯ", "История загружена.");
+                (Application.OpenForms[0] as Form1).addEvent(SECCODE, "История загружена.");
                 
             }
             catch
             {
-                if (slot.State.Equals(SlotState.Connected))
-                    (Application.OpenForms[0] as Form1).addEvent("ИСТОРИЯ", "Не удалось загрузить историю, обратитесь в поддержку.");
-                else
-                    (Application.OpenForms[0] as Form1).addEvent(slot.SlotID.ToString(),"Не удалось подключиться к серверу истории.");
+                (Application.OpenForms[0] as Form1).addEvent(SECCODE, "Не удалось загрузить историю, обратитесь в поддержку.");
             }
             return res;
-        }
-        private void s_evhSlotStateChanged(object Sender, SlotEventArgs e)
-        {
-            (Application.OpenForms[0] as Form1).addEvent(e.Slot.ToString(), e.State.ToString());
-            if (e.State == SlotState.Failed || e.State == SlotState.Denied)
-            {
-                slot.Disconnect();
-                slot.evhSlotStateChanged -= s_evhSlotStateChanged;
-                MessageBox.Show("Не удается соединиится с сервером!\nПроверьте введенные данные.\n "+slot.Login+" "+slot.Server+" "+slot.Port);
-            }
         }
     }
 }

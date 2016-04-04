@@ -12,12 +12,11 @@ namespace WindowsFormsApplication2
     class Security
     {
         public static List<Security> securities;
-        public List<RawCandle> MICEX_history
+        public List<RawCandle> history
         { get; set; }
         public Security()
         {
-            MICEX_history = new List<RawCandle>();
-            history = new List<History>();
+            history = new List<RawCandle>();
             transactions = new List<int>();
             this.amount = 0;
             this.price = 0;
@@ -26,8 +25,7 @@ namespace WindowsFormsApplication2
 
         public Security(string ticker)
         {
-            MICEX_history = new List<RawCandle>();
-            history = new List<History>();
+            history = new List<RawCandle>();
             transactions = new List<int>();
             this.ticker = ticker;
             this.price = 0;
@@ -36,21 +34,35 @@ namespace WindowsFormsApplication2
 
         public static int order=1; 
         public string ticker 
-            { get; set; }
+            { get; private set; }
 
         public int amount
-            { get; set; }
+            { get; private set; }
 
         public double price 
-            { get; set; }
-
-        public List<History> history
-        { get; set; }
+            { get; private set; }
 
         public List<int> transactions
-        { get; set; }
+        { get; private set; }
 
-        public string AddOrder(int amount, double price, double stop_los,double take_pt)
+        public string check(int amount, double price, double stop_los, double take_pt)
+        {
+            string buysell = "";
+            if ((Application.OpenForms[0] as Form1).radioButton4.Checked)
+            {
+                this.amount += amount;
+                buysell = "B";
+            }
+            else
+            {
+                this.amount -= amount;
+                buysell = "S";
+            }
+            return String.Format("Инструмент: {0,-5}\nЦена: {1,-5}\nКоличество: {2,-5}\nНаправление: {3,-5}\nТип заявки: {4,-5}\nstop-los: {5,-5}\ntake-pt: {6,-5}",
+                this.ticker, this.price, amount, buysell, "Limit", stop_los, take_pt);
+        }
+
+        public void addOrder(int amount, double price, double stop_los,double take_pt)
         {
             string buysell = "";
             if ((Application.OpenForms[0] as Form1).radioButton4.Checked)
@@ -67,12 +79,25 @@ namespace WindowsFormsApplication2
             (Application.OpenForms[0] as Form1).dataGridView1.Rows.Add(order,this.ticker,amount,this.price,buysell,"Limit", stop_los, take_pt);
             order++;
             this.transactions.Add(order);
-
-            return String.Format("Инструмент: {0,-5}\nЦена: {1,-5}\nКоличество: {2,-5}\nНаправление: {3,-5}\nТип заявки: {4,-5}\nstop-los: {5,-5}\ntake-pt: {6,-5}",
-                this.ticker, this.price, amount,buysell, "Limit", stop_los, take_pt);
         }
 
-        public string AddOrder(int amount, double stop_los, double take_pt)
+        public string check(int amount, double stop_los, double take_pt)
+        {
+            string buysell = "";
+            if ((Application.OpenForms[0] as Form1).radioButton4.Checked)
+            {
+                this.amount += amount;
+                buysell = "B";
+            }
+            else
+            {
+                this.amount -= amount;
+                buysell = "S";
+            }
+            return String.Format("Инструмент: {0,-5}\nКоличество: {2,-5}\nНаправление: {3,-5}\nТип заявки: {4,-5}\nstop-los: {5,-5}\ntake-pt: {6,-5}",
+                this.ticker, 0, amount, buysell, "Market", stop_los, take_pt);
+        }
+        public void addOrder(int amount, double stop_los, double take_pt)
         {
             string buysell = "";
             if ((Application.OpenForms[0] as Form1).radioButton4.Checked)
@@ -88,33 +113,6 @@ namespace WindowsFormsApplication2
             (Application.OpenForms[0] as Form1).dataGridView1.Rows.Add(order, this.ticker, amount, this.price,buysell, "Market", stop_los, take_pt);
             order++;
             this.transactions.Add(order);
-            return String.Format("Инструмент: {0,-5}\nКоличество: {2,-5}\nНаправление: {3,-5}\nТип заявки: {4,-5}\nstop-los: {5,-5}\ntake-pt: {6,-5}",
-                this.ticker, 0, amount, buysell,"Market", stop_los, take_pt);
-        }
-
-        public class History
-        {
-            public History(double open, double hight, double low, double close, long volume, DateTime date)
-            {
-                this.open = open;
-                this.hight = hight;
-                this.low = low;
-                this.close = close;
-                this.volume = volume;
-                this.date = date;
-            }
-            public double open
-                { get; set; }
-            public double hight
-                { get; set; }
-            public double low
-                { get; set; }
-            public double close
-                { get; set; }
-            public long volume
-                { get; set; }
-            public DateTime date
-                { get; set; }
         }
     }
 }
