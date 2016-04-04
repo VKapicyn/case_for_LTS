@@ -68,6 +68,18 @@ namespace WindowsFormsApplication2
             label3.Visible = true;
         }
 
+        private void radioButton5_CheckedChanged(Object sender, EventArgs e)
+        {
+            label11.Text = "Период (в днях от 1 до 30): ";
+            label10.Text = "Таймфрейм в секундах: ";
+        }
+
+        private void radioButton6_CheckedChanged(object sender, EventArgs e)
+        {
+            label11.Text = "Период (в годах)";
+            label10.Text = "Таймфрейм в 1/7/30\n=день/неделя/месяц";
+        }
+
         //метод заглушка
         private void make_order(object sender, DoWorkEventArgs e)
         {          
@@ -289,9 +301,18 @@ namespace WindowsFormsApplication2
             int time = 0, from = 0;
             try
             {
-                time = int.Parse(textBox6.Text);
-                if (time <= 0)
-                    throw new Exception();
+                if (radioButton5.Checked)
+                {
+                    time = int.Parse(textBox6.Text);
+                    if (time <= 0)
+                        throw new Exception();
+                }
+                else
+                {
+                    time = int.Parse(textBox6.Text);
+                    if (time != 1 && time != 30 && time != 7)
+                        throw new Exception();
+                }
             }
             catch
             {
@@ -300,9 +321,18 @@ namespace WindowsFormsApplication2
             }
             try
             {
-                from = int.Parse(textBox7.Text);
-                if (from < 1 || from > 30)
-                    throw new Exception();
+                if (radioButton5.Checked)
+                {
+                    from = int.Parse(textBox7.Text);
+                    if (from < 1 || from > 30)
+                        throw new Exception();
+                }
+                else
+                {
+                    from = int.Parse(textBox7.Text);
+                    if (from < 1 )
+                        throw new Exception();
+                }
             }
             catch
             {
@@ -311,8 +341,16 @@ namespace WindowsFormsApplication2
             }
 
             User user = User.getInstance();
-            first.history = user.getHistory("TQBR", first.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
-            second.history = user.getHistory("TQBR", second.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
+            if (radioButton5.Checked)
+            {
+                first.history = user.getHistory("TQBR", first.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
+                second.history = user.getHistory("TQBR", second.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
+            }
+            else
+            {
+                first.history = user.getHistory(first.ticker, from, time);
+                second.history = user.getHistory(second.ticker, from, time);
+            }
             if (first.history == null)
             {
                 MessageBox.Show("Неудалось получить историю инструмента " + first.ticker);
@@ -360,21 +398,21 @@ namespace WindowsFormsApplication2
             a c = (a)b;
                 StreamWriter sw = new StreamWriter(c.name, true, Encoding.UTF8);
                 sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (c.one.history.Count + 1) + "'B2:B" + (c.one.history.Count + 1) + ");;" + getCorrelation(c.one, c.two));
-                for (int i = 1; i < c.one.history.Count - 1; i++)
+                sw.WriteLine(c.one.history[0].Close + ";" + c.two.history[0].Close + ";1");
+                for (int i = 1; i < c.one.history.Count; i++)
                 {
                     sw.WriteLine(c.one.history[i].Close + ";" + c.two.history[i].Close + ";" + (1+(((c.one.history[i].Close - c.one.history[i - 1].Close) / c.one.history[i - 1].Close) - (c.two.history[i].Close - c.two.history[i - 1].Close) / c.two.history[i - 1].Close)).ToString());
                 }
+                addEvent("Корреляция",c.one.ticker+" с  "+c.two.ticker);
                 sw.Close();
-                addEvent("System","Файл "+c.name+" сохранен");
-                User user = User.getInstance();
-                user.clear();
+                addEvent("Сохранение","Файл "+c.name+" сохранен");
         }
 
         private double getCorrelation(Security one, Security two)
         {
             //найти более точную формулу.
             double x = 0, y = 0, xx = 0, xy = 0, yy = 0;
-            for (int i = 0; i < (one.history.Count - 1); i++)
+            for (int i = 0; i < (one.history.Count); i++)
             {
                 x += one.history[i].Close;
                 y += two.history[i].Close;
@@ -384,10 +422,109 @@ namespace WindowsFormsApplication2
             }
             return (xy * one.history.Count - x * y) / Math.Sqrt((xx * one.history.Count - x * x) * (yy * one.history.Count - y * y));
         }
-
         private void button5_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Заглушка");
+            BackgroundWorker making_correl = new BackgroundWorker();
+            making_correl.DoWork += all_correl;
+            making_correl.RunWorkerAsync();
+        }
+
+        private void all_correl(object sender, DoWorkEventArgs e)
+        {
+            int time = 0, from = 0;
+            try
+            {
+                if (radioButton5.Checked)
+                {
+                    time = int.Parse(textBox6.Text);
+                    if (time <= 0)
+                        throw new Exception();
+                }
+                else
+                {
+                    time = int.Parse(textBox6.Text);
+                    if (time != 1 && time != 30 && time != 7)
+                        throw new Exception();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Некорректное значения таймфрейма.");
+                return;
+            }
+            try
+            {
+                if (radioButton5.Checked)
+                {
+                    from = int.Parse(textBox7.Text);
+                    if (from < 1 || from > 30)
+                        throw new Exception();
+                }
+                else
+                {
+                    from = int.Parse(textBox7.Text);
+                    if (from < 1)
+                        throw new Exception();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Некорректное значения периода.");
+                return;
+            }
+            List<string> tikers = new List<string>(MOEX_tikers);
+            for (int i = 0; i < MOEX_tikers.Count; i++)
+            {
+                if (tikers.Count > 1)
+                {
+                    tikers.RemoveAt(0);
+                    for (int j = 0; j < tikers.Count; j++)
+                    {
+                        combine(MOEX_tikers[i], tikers[j], time, from);
+                    }
+                }
+                else
+                    break;
+            }
+            addEvent("System", "Всё проверенно.");
+            MessageBox.Show("Всё проверенно.");
+        }
+        private void combine(string one, string two,int time,int from)
+        {
+            Security first=new Security(one), second = new Security(two);
+            User user = User.getInstance();
+            if (radioButton5.Checked)
+            {
+                first.history = user.getHistory("TQBR", first.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
+                second.history = user.getHistory("TQBR", second.ticker, DateTime.Now.AddDays((-1) * from), DateTime.Now, time);
+            }
+            else
+            {
+                first.history = user.getHistory(first.ticker,from,time);
+                second.history = user.getHistory(second.ticker, from, time);
+            }
+            if (first.history == null)
+            {
+                addEvent(first.ticker,"Неудалось получить историю инструмента");
+                return;
+            }
+            if (second.history == null)
+            {
+                addEvent(second.ticker, "Неудалось получить историю инструмента");
+                return;
+            }
+
+            string name = "result"+@"\"+getCorrelation(first, second) + "_" + one + "_" + two+".csv";
+            StreamWriter sw = new StreamWriter(name, true, Encoding.UTF8);
+            sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (first.history.Count + 1) + "'B2:B" + (first.history.Count + 1) + ");;" + getCorrelation(first, second));
+            sw.WriteLine(first.history[0].Close + ";" + first.history[0].Close + ";1");
+            for (int i = 1; i < first.history.Count; i++)
+            {
+                sw.WriteLine(first.history[i].Close + ";" + second.history[i].Close + ";" + (1 + (((first.history[i].Close - first.history[i - 1].Close) / first.history[i - 1].Close) - (second.history[i].Close - second.history[i - 1].Close) / second.history[i - 1].Close)).ToString());
+            }
+            addEvent("Корреляция", first.ticker + " с  " + second.ticker);
+            sw.Close();
+            addEvent("Сохранение", "Файл " + name + " сохранен");
         }
     }
 }

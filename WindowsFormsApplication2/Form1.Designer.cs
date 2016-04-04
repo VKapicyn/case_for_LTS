@@ -579,6 +579,7 @@
             this.radioButton5.TabStop = true;
             this.radioButton5.Text = "Atentis.History";
             this.radioButton5.UseVisualStyleBackColor = true;
+            this.radioButton5.CheckedChanged += new System.EventHandler(this.radioButton5_CheckedChanged);
             // 
             // radioButton6
             // 
@@ -587,9 +588,9 @@
             this.radioButton6.Name = "radioButton6";
             this.radioButton6.Size = new System.Drawing.Size(117, 17);
             this.radioButton6.TabIndex = 1;
-            this.radioButton6.TabStop = true;
             this.radioButton6.Text = "finance.yahoo.com";
             this.radioButton6.UseVisualStyleBackColor = true;
+            this.radioButton6.CheckedChanged += new System.EventHandler(this.radioButton6_CheckedChanged);
             // 
             // Form1
             // 
