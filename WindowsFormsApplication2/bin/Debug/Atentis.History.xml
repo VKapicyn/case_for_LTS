@@ -1,0 +1,231 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Atentis.History</name>
+    </assembly>
+    <members>
+        <member name="T:Atentis.History.HistoryProvider">
+            <summary>
+            Предоставляет доступ к сервисам исторических данных
+            </summary>
+        </member>
+        <member name="T:Atentis.History.HistoryProvider.OnNewTradeDelegate">
+            <summary>
+            Делегат для обработки события новой сделки (OnNewTrade)
+            </summary>
+            <param name="secid">Идентификатор инструмента</param>
+            <param name="trade">Представление сделки</param>
+        </member>
+        <member name="T:Atentis.History.HistoryProvider.CandleDelegate">
+            <summary>
+            Делегат для обработки событий со свечками
+            </summary>
+            <param name="candle">Ссыка на свечку</param>
+        </member>
+        <member name="E:Atentis.History.HistoryProvider.OnNewTrade">
+            <summary>
+            Событие, сообщающее о приходе новой сделки с сервера. Вызывается только тогда, когда подключена библиотека Atentis.Connection
+            </summary>
+        </member>
+        <member name="E:Atentis.History.HistoryProvider.OnNewCandle">
+            <summary>
+            Событие, сообщающее о создании новой незаполненной свечки. Вызывается только тогда, когда подключена библиотека Atentis.Connection
+            </summary>
+        </member>
+        <member name="E:Atentis.History.HistoryProvider.OnCandleFinished">
+            <summary>
+            Событие, сообщающее о завершении заполнения свечки. Вызывается только тогда, когда подключена библиотека Atentis.Connection
+            </summary>
+        </member>
+        <member name="E:Atentis.History.HistoryProvider.OnCandleUpdated">
+            <summary>
+            Вызывается при обновлении или добавлении свечки в наблюдаемую коллекцию
+            </summary>
+        </member>
+        <member name="M:Atentis.History.HistoryProvider.#ctor(System.String,System.Int32)">
+            <summary>
+            Инициализирует провайдер исторических данных
+            </summary>
+            <param name="host">Адрес сервера истории. По умолчанию: "history.alor.ru"</param>
+            <param name="port">Порт сервера истории. По умолчанию: 4003</param>
+        </member>
+        <member name="M:Atentis.History.HistoryProvider.RegisterSlot(System.Object)">
+            <summary>
+            Выполняет регистрацию подключения к торговой системе. Требуется для загрузки данных за текущую торговую сессию
+            </summary>
+            <param name="slot">Слот, через который будет установлено соединение</param>
+        </member>
+        <member name="M:Atentis.History.HistoryProvider.LoadHistory(Atentis.History.HistoryRequest,System.Boolean)">
+            <summary>
+            Выполняет загрузку и форматирование истории. Добавляет данные за текущую торговую сессию, если подключена библиотека Atentis.Connection
+            </summary>
+            <param name="req">Параметры запроса</param>
+            <param name="updateCollection">Если "true" и подключена библиотека Atentis.Connection, то в возвращенную коллекцию будут добавляться новые свечи в реальном времени с вызовом события "OnHistoryUpdated"</param>
+            <returns>Запрошенные исторические данные. Если параметр "updateCollection" был установлен в значение "true" и зарегистрирвоана библиотека Atentis.Connection, то данный список будет автоматически обновляться данными за текущую торговую сессию</returns>
+        </member>
+        <member name="T:Atentis.History.Compression">
+            <summary>
+            Осуществляет компрессию/декомпрессию по алгоритму gzip (GZipStream)
+            </summary>
+        </member>
+        <member name="M:Atentis.History.Compression.Compress(System.Byte[])">
+            <summary>
+            Компрессия (сжатие) по алгоритму gzip
+            </summary>
+            <param name="raw">Массив байтов для сжатия</param>
+            <returns>Массив байтов после сжатия</returns>
+        </member>
+        <member name="M:Atentis.History.Compression.Decompress(System.Byte[])">
+            <summary>
+            Декомпрессия по алгоритму gzip
+            </summary>
+            <param name="gzip">Сжатые данные</param>
+            <returns>Разархивированный массив байтов</returns>
+        </member>
+        <member name="T:Atentis.History.RawCandle">
+            <summary>
+            Представление свечи
+            </summary>
+        </member>
+        <member name="F:Atentis.History.RawCandle.BeginTime">
+            <summary>
+            Время открытия
+            </summary>
+        </member>
+        <member name="F:Atentis.History.RawCandle.Open">
+            <summary>
+            Цена открытия
+            </summary>
+        </member>
+        <member name="F:Atentis.History.RawCandle.High">
+            <summary>
+            Максимальная цена
+            </summary>
+        </member>
+        <member name="F:Atentis.History.RawCandle.Low">
+            <summary>
+            Минимальная цена
+            </summary>
+        </member>
+        <member name="F:Atentis.History.RawCandle.Close">
+            <summary>
+            Цена закрытия
+            </summary>
+        </member>
+        <member name="F:Atentis.History.RawCandle.Volume">
+            <summary>
+            Объем
+            </summary>
+        </member>
+        <member name="M:Atentis.History.RawCandle.#ctor(System.DateTime,System.Double,System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            Инициализирует экземпляр свечки 
+            </summary>
+            <param name="beginTime">Время открытия</param>
+            <param name="open">Цена открытия</param>
+            <param name="high">Максимальная цена</param>
+            <param name="low">Минимальная цена</param>
+            <param name="close">Цена закрытия</param>
+            <param name="volume">Объем</param>
+        </member>
+        <member name="M:Atentis.History.RawCandle.ToString">
+            <summary>
+            Строковое представление
+            </summary>
+        </member>
+        <member name="T:Atentis.History.Trade">
+            <summary>
+            Представление сделки
+            </summary>
+        </member>
+        <member name="F:Atentis.History.Trade.DateTime">
+            <summary>
+            Время сделки
+            </summary>
+        </member>
+        <member name="F:Atentis.History.Trade.Price">
+            <summary>
+            Цена
+            </summary>
+        </member>
+        <member name="F:Atentis.History.Trade.Volume">
+            <summary>
+            Объем
+            </summary>
+        </member>
+        <member name="M:Atentis.History.Trade.#ctor(System.DateTime,System.Double,System.Int32)">
+            <summary>
+            Инициализирует экземпляр сделки
+            </summary>
+            <param name="datetime">Время сделки</param>
+            <param name="price">Цена</param>
+            <param name="volume">Объем</param>
+        </member>
+        <member name="T:Atentis.History.HistoryRequest">
+            <summary>
+            Представляет запрос на получение исторических данных
+            </summary>
+        </member>
+        <member name="F:Atentis.History.HistoryRequest.Reserved">
+            <summary>
+            Поле зарезервировано. Не используется.
+            </summary>
+        </member>
+        <member name="F:Atentis.History.HistoryRequest.SecBoard">
+            <summary>
+            Режим инструмента
+            </summary>
+        </member>
+        <member name="F:Atentis.History.HistoryRequest.SecCode">
+            <summary>
+            Код инструмента
+            </summary>
+        </member>
+        <member name="F:Atentis.History.HistoryRequest.TimeFrame">
+            <summary>
+            Таймфрейм в секундах
+            </summary>
+        </member>
+        <member name="F:Atentis.History.HistoryRequest.From">
+            <summary>
+            Дата и время начала запрашиваемой истории
+            </summary>
+        </member>
+        <member name="F:Atentis.History.HistoryRequest.Till">
+            <summary>
+            Дата и время окончания запрашиваемой истории
+            </summary>
+        </member>
+        <member name="F:Atentis.History.HistoryRequest.compressed">
+            <summary>
+            Сжатие исторических данных
+            </summary>
+        </member>
+        <member name="F:Atentis.History.HistoryRequest.bestExecution">
+            <summary>
+            История по Best Execution (не реализовано)
+            </summary>
+        </member>
+        <member name="F:Atentis.History.HistoryRequest.Client">
+            <summary>
+            Идентификатор приложения, в котором выполняется запрос истории
+            </summary>
+        </member>
+        <member name="M:Atentis.History.HistoryRequest.#ctor(System.String,System.String,System.Int32,System.DateTime,System.DateTime)">
+            <summary>
+            Создает запрос на получение исторических данных
+            </summary>
+            <param name="secboard">Режим инструмента</param>
+            <param name="seccode">Код инструмента</param>
+            <param name="timeFrame">Таймфрейм в секундах</param>
+            <param name="from">Дата с</param>
+            <param name="till">Дата по</param>
+        </member>
+        <member name="M:Atentis.History.HistoryRequest.ToString">
+            <summary>
+            Преобразует запрос в текстовый формат
+            </summary>
+            <returns>Строковое представление запроса</returns>
+        </member>
+    </members>
+</doc>
