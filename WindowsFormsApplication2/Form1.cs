@@ -519,7 +519,7 @@ namespace WindowsFormsApplication2
             string name = "result"+@"\"+getCorrelation(first, second) + "_" + one + "_" + two+".csv";
             StreamWriter sw = new StreamWriter(name, true, Encoding.UTF8);
             sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (first.history.Count + 1) + "'B2:B" + (first.history.Count + 1) + ");;" + getCorrelation(first, second));
-            sw.WriteLine(first.history[0].Close + ";" + first.history[0].Close + ";1");
+            sw.WriteLine(first.history[0].Close + ";" + second.history[0].Close + ";1");
             for (int i = 1; i < first.history.Count && i < second.history.Count; i++)
             {
                 sw.WriteLine(first.history[i].Close + ";" + second.history[i].Close + ";" + (1 + (((first.history[i].Close - first.history[i - 1].Close) / first.history[i - 1].Close) - (second.history[i].Close - second.history[i - 1].Close) / second.history[i - 1].Close)).ToString());
