@@ -411,24 +411,24 @@ namespace WindowsFormsApplication2
         private double getCorrelation(Security one, Security two)
         {
             //найти более точную формулу.
-            double x = 0, xx = 0, xy = 0, yy = 0;
-            double a,b,c,x_sr,y_sr;
+            double x = 0, xy = 0, yy = 0;
+            double x_sr=0,y_sr=0;
             for (int i = 0; i < one.history.Count && i < two.history.Count; i++)
             {
                     x_sr += one.history[i].Close;
                     y_sr += two.history[i].Close;
             }
-            x_sr=x_sr/n;
-            y_sr=y_sr/n;
+            x_sr = x_sr / one.history.Count;
+            y_sr = y_sr / two.history.Count;
             for (int i = 0; i < one.history.Count && i < two.history.Count; i++)
                 {
                     x += (one.history[i].Close - x_sr) * (two.history[i].Close - y_sr);
-                    xy += Math.Pow(one.history[i].Close - x_sr);
-                    yy += Math.Pow(two.history[i].Close - x_sr);
+                    xy += Math.Pow((one.history[i].Close - x_sr),2);
+                    yy += Math.Pow((two.history[i].Close - x_sr),2);
                 }
-            xy = Math.Sqrt(xy / (n - 1));
-            yy = Math.Sqrt(yy / (n - 1));
-            return (x / (n - 1)) / xy * yy;
+            xy = Math.Sqrt(xy);
+            yy = Math.Sqrt(yy);
+            return (x/(one.history.Count-1)) / (xy * yy);
         }
 
         //сравнение всех пар
