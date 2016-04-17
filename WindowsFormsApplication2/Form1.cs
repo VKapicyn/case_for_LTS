@@ -362,29 +362,36 @@ namespace WindowsFormsApplication2
                 return;
             }
 
-            a parametr = new a();
-            Stream myStream;//неиспользуемый поток, при убитии которого можно записать в файл из неосновного потока. 
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-
-            saveFileDialog1.Filter = "csv files (*.csv)|*.csv";
-            saveFileDialog1.FilterIndex = 2;
-            saveFileDialog1.RestoreDirectory = true;
-
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            if (radioButton7.Checked == true)
             {
-                if ((myStream = saveFileDialog1.OpenFile()) != null)
+                a parametr = new a();
+                Stream myStream;//неиспользуемый поток, при убитии которого можно записать в файл из неосновного потока. 
+                SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+                saveFileDialog1.Filter = "csv files (*.csv)|*.csv";
+                saveFileDialog1.FilterIndex = 2;
+                saveFileDialog1.RestoreDirectory = true;
+
+                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
-                    myStream.Close();
-                    parametr.one = first;
-                    parametr.two = second;
-                    parametr.name = saveFileDialog1.FileName;
+                    if ((myStream = saveFileDialog1.OpenFile()) != null)
+                    {
+                        myStream.Close();
+                        parametr.one = first;
+                        parametr.two = second;
+                        parametr.name = saveFileDialog1.FileName;
+                    }
+                }
+
+                if (saveFileDialog1.FileName != "")
+                {
+                    Thread thread = new Thread(new ParameterizedThreadStart(output));
+                    thread.Start(parametr);
                 }
             }
-
-            if (saveFileDialog1.FileName != "")
+            else
             {
-                Thread thread = new Thread(new ParameterizedThreadStart(output));
-                thread.Start(parametr);
+                MessageBox.Show(first.ticker + " " + second.ticker + " " + getCorrelation(first, second));
             }
         }
         struct a
@@ -408,27 +415,19 @@ namespace WindowsFormsApplication2
                 addEvent("Сохранение","Файл "+c.name+" сохранен");
         }
 
-        private double getCorrelation(Security one, Security two)
+        private decimal getCorrelation(Security one, Security two)
         {
-            //найти более точную формулу.
-            double x = 0, xy = 0, yy = 0;
-            double x_sr=0,y_sr=0;
-            for (int i = 0; i < one.history.Count && i < two.history.Count; i++)
+            decimal x = 0, y = 0, xx = 0, xy = 0, yy = 0;
+            int count = one.history.Count < two.history.Count ? one.history.Count : two.history.Count;
+            for (int i = 0; i < count; i++)
             {
-                    x_sr += one.history[i].Close;
-                    y_sr += two.history[i].Close;
+                x += (decimal)one.history[i].Close;
+                y += (decimal)two.history[i].Close;
+                xy += (decimal)one.history[i].Close * (decimal)two.history[i].Close;
+                xx += (decimal)one.history[i].Close * (decimal)one.history[i].Close;
+                yy += (decimal)two.history[i].Close * (decimal)two.history[i].Close;
             }
-            x_sr = x_sr / one.history.Count;
-            y_sr = y_sr / two.history.Count;
-            for (int i = 0; i < one.history.Count && i < two.history.Count; i++)
-                {
-                    x += (one.history[i].Close - x_sr) * (two.history[i].Close - y_sr);
-                    xy += Math.Pow((one.history[i].Close - x_sr),2);
-                    yy += Math.Pow((two.history[i].Close - x_sr),2);
-                }
-            xy = Math.Sqrt(xy);
-            yy = Math.Sqrt(yy);
-            return (x/(one.history.Count-1)) / (xy * yy);
+            return (xy * (decimal)count - x * y) / (decimal)Math.Sqrt((double)(xx * (decimal)count - x * x) * (double)((yy * (decimal)count - y * y)));  
         }
 
         //сравнение всех пар
@@ -524,16 +523,17 @@ namespace WindowsFormsApplication2
                 return;
             }
 
-            string name = "result"+@"\"+getCorrelation(first, second) + "_" + one + "_" + two+".csv";
-            StreamWriter sw = new StreamWriter(name, true, Encoding.UTF8);
-            sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (first.history.Count + 1) + "'B2:B" + (first.history.Count + 1) + ");;" + getCorrelation(first, second));
-            sw.WriteLine(first.history[0].Close + ";" + second.history[0].Close + ";1");
-            for (int i = 1; i < first.history.Count && i < second.history.Count; i++)
-            {
-                sw.WriteLine(first.history[i].Close + ";" + second.history[i].Close + ";" + (1 + (((first.history[i].Close - first.history[i - 1].Close) / first.history[i - 1].Close) - (second.history[i].Close - second.history[i - 1].Close) / second.history[i - 1].Close)).ToString());
-            }
-            addEvent("Корреляция", first.ticker + " с  " + second.ticker);
-            sw.Close();
+                string name = "result" + @"\" + getCorrelation(first, second) + "_" + one + "_" + two + ".csv";
+                StreamWriter sw = new StreamWriter(name, true, Encoding.UTF8);
+                sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (first.history.Count + 1) + "'B2:B" + (first.history.Count + 1) + ");;" + getCorrelation(first, second));
+                sw.WriteLine(first.history[0].Close + ";" + second.history[0].Close + ";1");
+                for (int i = 1; i < first.history.Count && i < second.history.Count; i++)
+                {
+                    sw.WriteLine(first.history[i].Close + ";" + second.history[i].Close + ";" + (1 + (((first.history[i].Close - first.history[i - 1].Close) / first.history[i - 1].Close) - (second.history[i].Close - second.history[i - 1].Close) / second.history[i - 1].Close)).ToString());
+                }
+                addEvent("Корреляция", first.ticker + " с  " + second.ticker);
+                sw.Close();
+
             addEvent("Сохранение", "Файл " + name + " сохранен");
         }
     }
