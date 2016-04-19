@@ -9,7 +9,7 @@ using Atentis.History;
 
 namespace WindowsFormsApplication2
 {
-    class Security
+    public class Security
     {
         public static List<Security> securities;
         public List<RawCandle> history

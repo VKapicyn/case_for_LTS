@@ -16,7 +16,9 @@ namespace WindowsFormsApplication2
 {
     public partial class Form1 : Form
     {
-        List<string> MOEX_tikers = new List<string>();
+        public List<string> MOEX_tikers = new List<string>();
+        public int from=0,time=0;
+        public static decimal min=-1, max=1;
         public Form1()
         {
             InitializeComponent();
@@ -415,32 +417,45 @@ namespace WindowsFormsApplication2
                 addEvent("Сохранение","Файл "+c.name+" сохранен");
         }
 
-        private decimal getCorrelation(Security one, Security two)
+        public decimal getCorrelation(Security one, Security two)
         {
             decimal x = 0, y = 0, xx = 0, xy = 0, yy = 0;
             int count = one.history.Count < two.history.Count ? one.history.Count : two.history.Count;
-            for (int i = 0; i < count; i++)
+            if (one.history.Count != 0)
             {
-                x += (decimal)one.history[i].Close;
-                y += (decimal)two.history[i].Close;
-                xy += (decimal)one.history[i].Close * (decimal)two.history[i].Close;
-                xx += (decimal)one.history[i].Close * (decimal)one.history[i].Close;
-                yy += (decimal)two.history[i].Close * (decimal)two.history[i].Close;
+                for (int i = 0; i < count; i++)
+                {
+                    x += (decimal)one.history[i].Close;
+                    y += (decimal)two.history[i].Close;
+                    xy += (decimal)one.history[i].Close * (decimal)two.history[i].Close;
+                    xx += (decimal)one.history[i].Close * (decimal)one.history[i].Close;
+                    yy += (decimal)two.history[i].Close * (decimal)two.history[i].Close;
+                }
+                return (xy * (decimal)count - x * y) / (decimal)Math.Sqrt((double)(xx * (decimal)count - x * x) * (double)((yy * (decimal)count - y * y)));
+
             }
-            return (xy * (decimal)count - x * y) / (decimal)Math.Sqrt((double)(xx * (decimal)count - x * x) * (double)((yy * (decimal)count - y * y)));  
+            else
+            { return 0; }
         }
 
         //сравнение всех пар
         private void button5_Click(object sender, EventArgs e)
         {
-            BackgroundWorker making_correl = new BackgroundWorker();
-            making_correl.DoWork += all_correl;
-            making_correl.RunWorkerAsync();
+            if (radioButton7.Checked != true)
+            {
+                Form2 form=new Form2();
+                form.Owner=this;
+                form.ShowDialog();
+                tabControl1.SelectedIndex = 2;
+            }
+
+                BackgroundWorker making_correl = new BackgroundWorker();
+                making_correl.DoWork += all_correl;
+                making_correl.RunWorkerAsync();
         }
 
         private void all_correl(object sender, DoWorkEventArgs e)
         {
-            int time = 0, from = 0;
             try
             {
                 if (radioButton5.Checked)
@@ -481,20 +496,22 @@ namespace WindowsFormsApplication2
                 MessageBox.Show("Некорректное значения периода.");
                 return;
             }
-            List<string> tikers = new List<string>(MOEX_tikers);
-            for (int i = 0; i < MOEX_tikers.Count; i++)
-            {
-                if (tikers.Count > 1)
+
+                List<string> tikers = new List<string>(MOEX_tikers);
+                for (int i = 0; i < MOEX_tikers.Count; i++)
                 {
-                    tikers.RemoveAt(0);
-                    for (int j = 0; j < tikers.Count; j++)
+                    if (tikers.Count > 1)
                     {
-                        combine(MOEX_tikers[i], tikers[j], time, from);
+                        tikers.RemoveAt(0);
+                        for (int j = 0; j < tikers.Count; j++)
+                        {
+                            combine(MOEX_tikers[i], tikers[j], time, from);
+                        }
                     }
+                    else
+                        break;
                 }
-                else
-                    break;
-            }
+
             addEvent("System", "Всё проверенно.");
             MessageBox.Show("Всё проверенно.");
         }
@@ -522,8 +539,11 @@ namespace WindowsFormsApplication2
                 addEvent(second.ticker, "Неудалось получить историю инструмента");
                 return;
             }
+            string name = "";
 
-                string name = "result" + @"\" + getCorrelation(first, second) + "_" + one + "_" + two + ".csv";
+            if (radioButton7.Checked == true)
+            {
+                name = "result" + @"\" + getCorrelation(first, second) + "_" + one + "_" + two + ".csv";
                 StreamWriter sw = new StreamWriter(name, true, Encoding.UTF8);
                 sw.WriteLine("Close_one;Close_two;Correlation;;Correlation coefficient=;=КОРРЕЛ(A2:A" + (first.history.Count + 1) + "'B2:B" + (first.history.Count + 1) + ");;" + getCorrelation(first, second));
                 sw.WriteLine(first.history[0].Close + ";" + second.history[0].Close + ";1");
@@ -533,8 +553,58 @@ namespace WindowsFormsApplication2
                 }
                 addEvent("Корреляция", first.ticker + " с  " + second.ticker);
                 sw.Close();
-
-            addEvent("Сохранение", "Файл " + name + " сохранен");
+                addEvent("Сохранение", "Файл " + name + " сохранен");
+            }
+            else
+            {
+                decimal correl = getCorrelation(first, second);
+                if(correl>=min&&correl<=max)
+                    dataGridView2.Rows.Add(first.ticker, second.ticker, getCorrelation(first, second));
+                addEvent("Корреляция", first.ticker + " с  " + second.ticker);
+            }
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+                Stream myStream;//неиспользуемый поток, при убитии которого можно записать в файл из неосновного потока. 
+                SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+                saveFileDialog1.Filter = "csv files (*.csv)|*.csv";
+                saveFileDialog1.FilterIndex = 2;
+                saveFileDialog1.RestoreDirectory = true;
+
+                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    if ((myStream = saveFileDialog1.OpenFile()) != null)
+                    {
+                        myStream.Close();
+                        FileStream fs = new FileStream(saveFileDialog1.FileName, FileMode.Create);
+                        StreamWriter streamWriter = new StreamWriter(fs);
+
+                        try
+                        {
+                            for (int j = 0; j < dataGridView2.Rows.Count; j++)
+                            {
+                                for (int i = 0; i < dataGridView2.Rows[j].Cells.Count; i++)
+                                {
+                                    streamWriter.Write(dataGridView2.Rows[j].Cells[i].Value + ";");
+                                }
+
+                                streamWriter.WriteLine();
+                            }
+
+                            streamWriter.Close();
+                            fs.Close();
+
+                            MessageBox.Show("Файл успешно сохранен");
+                        }
+                        catch
+                        {
+                            MessageBox.Show("Ошибка при сохранении файла!");
+                        }
+                    }
+                }
+        }
+
     }
 }
